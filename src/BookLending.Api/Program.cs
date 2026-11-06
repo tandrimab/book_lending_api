@@ -9,6 +9,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddSingleton<LoanService>();
 builder.Services.AddSingleton<IReminderSender, EmailReminder>();
+builder.Services.AddControllers();
 builder.Services.AddScoped<GreetingService>();
 
 var app = builder.Build();
@@ -45,4 +46,5 @@ app.MapGet("/greet/{name}", (string name, GreetingService greetServ) =>
     var greet = greetServ.Greet(name);
     return Results.Ok(new { greet });
 });
+app.MapControllers();
 app.Run();
