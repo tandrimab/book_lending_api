@@ -1,11 +1,16 @@
 namespace BookLending.Domain.Items
 {
+    public record struct IsbnNumber(string Value);
     public class Book : LibraryItem
     {
-        public string publisher { get; set; }
-        public Book(string title, string author, int year, string publisher) : base(title, author, year)
+        public IsbnNumber Isbn { get; private set; }
+        public string Publisher { get; private set; }
+
+        public override int LoanPeriod() => 14;
+        public Book(string title, string author, int year, string publisher, IsbnNumber isbn) : base(title, author, year)
         {
-            this.publisher = publisher;
+            Publisher = publisher;
+            Isbn = isbn;
         }
     }
 }
