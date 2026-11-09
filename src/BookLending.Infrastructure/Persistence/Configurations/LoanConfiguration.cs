@@ -13,8 +13,5 @@ public class LoanConfiguration : IEntityTypeConfiguration<Loan>
         builder.Property(l => l.Id).HasMaxLength(36).IsRequired();
         builder.Property(l => l.BookId).HasMaxLength(36).IsRequired();
         builder.Property(l => l.MemberId).HasMaxLength(36).IsRequired();
-        builder.Property(l => l.LoanDate).IsRequired();
-        builder.Property(l => l.DueDate).IsRequired();
-        builder.Property(l => l.ReturnedOn).IsRequired(false);
     }
 }
