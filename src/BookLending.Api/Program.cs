@@ -11,9 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
-builder.Services.AddSingleton<LoanService>();
 builder.Services.AddScoped<IBookRepository, EfBookRepository>();
 builder.Services.AddScoped<IMemberRepository, EfMemberRepository>();
+builder.Services.AddScoped<ILoanRepository, EfLoanRepository>();
 builder.Services.AddSingleton<IReminderSender, EmailReminder>();
 builder.Services.AddControllers();
 builder.Services.AddDbContext<BookLendingDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("BookLending")));
