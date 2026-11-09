@@ -1,6 +1,9 @@
 using BookLending.Domain.Loans;
 using BookLending.Domain.Reminders;
 using BookLending.Domain.Greetings;
+using BookLending.Domain.Items;
+using BookLending.Domain.Members;
+using BookLending.Api.Repositories;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -8,6 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddSingleton<LoanService>();
+builder.Services.AddSingleton<IBookRepository, InMemoryBookRepository>();
+builder.Services.AddSingleton<IMemberRepository, InMemoryMemberRepository>();
 builder.Services.AddSingleton<IReminderSender, EmailReminder>();
 builder.Services.AddControllers();
 builder.Services.AddScoped<GreetingService>();
@@ -33,12 +38,6 @@ app.Use(async (context, next) =>
     Console.WriteLine($"-->{context.Request.Method} {context.Request.Path}");
     await next();
     Console.WriteLine($"<-- {context.Request.Method} {context.Request.Path} completed in {sw.ElapsedMilliseconds} ms");
-});
-
-app.MapGet("/loans/stats", (LoanService loanService) =>
-{
-    var (total, overdue) = loanService.GetLoanStats();
-    return Results.Ok(new { total, overdue });
 });
 
 app.MapGet("/greet/{name}", (string name, GreetingService greetServ) =>
