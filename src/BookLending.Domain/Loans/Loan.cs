@@ -24,9 +24,9 @@ namespace BookLending.Domain.Loans
 
         public bool IsActive() => ReturnedOn == null;
 
-        public bool IsOverdue() => IsActive() && DateTime.Now > DueDate;
+        public bool IsOverdue() => IsActive() && DateTime.UtcNow > DueDate;
 
-        public int DaysOverDue() => IsOverdue() ? (DateTime.Now - DueDate).Days : 0;
+        public int DaysOverDue() => IsOverdue() ? (DateTime.UtcNow - DueDate).Days : 0;
 
         public void MarkAsReturned(DateTime returnedOn)
         {

@@ -1,24 +1,30 @@
 using BookLending.Domain.Items;
-using BookLending.Domain.Loans;
 using BookLending.Domain.Members;
+
+namespace BookLending.Domain.Loans;
 
 public class LoanService
 {
-    public List<Loan> LoanItems { get; private set; } = new List<Loan>();
+    private readonly ILoanRepository _loanRepository;
 
-    public IEnumerable<Loan> GetAllLoans() => LoanItems;
+    public LoanService(ILoanRepository loanRepository)
+    {
+        _loanRepository = loanRepository;
+    }
 
-    public Loan? GetLoanById(string id) => LoanItems.FirstOrDefault(loan => loan.Id == id);
+    public IEnumerable<Loan> GetAllLoans() => _loanRepository.GetAllLoans();
+
+    public Loan? GetLoanById(string id) => _loanRepository.GetLoanById(id);
 
     public Loan LendBook(Member member, Book book)
     {
         if (member == null) throw new ArgumentNullException(nameof(member));
         if (book == null) throw new ArgumentNullException(nameof(book));
 
-        var loanDate = DateTime.Now;
+        var loanDate = DateTime.UtcNow;
 
         var loan = new Loan(member.Id, book.Id, loanDate, null, book.LoanPeriod());
-        LoanItems.Add(loan);
+        _loanRepository.AddLoan(loan);
         return loan;
     }
 
@@ -27,22 +33,17 @@ public class LoanService
         if (loan == null) throw new ArgumentNullException(nameof(loan));
         if (!loan.IsActive()) throw new InvalidOperationException("Loan is not active.");
 
-        loan.MarkAsReturned(DateTime.Now);
+        loan.MarkAsReturned(DateTime.UtcNow);
+        _loanRepository.Update(loan);
     }
 
-    public IEnumerable<Loan> GetOverdueLoans(DateTime currentDate)
-    {
-        IEnumerable<Loan> overDueLoans =
-        from loan in LoanItems
-        where loan.IsOverdue()
-        select loan;
-        return overDueLoans;
-    }
+    public IEnumerable<Loan> GetOverdueLoans(DateTime currentDate) =>
+        _loanRepository.GetOverdueLoans(currentDate);
 
     public (int total, int overDue) GetLoanStats()
     {
-        int totalLoans = LoanItems.Count;
-        int overDueItems = LoanItems.Count(loan => loan.IsOverdue());
+        int totalLoans = _loanRepository.GetAllLoans().Count();
+        int overDueItems = _loanRepository.GetOverdueLoans(DateTime.UtcNow).Count();
         return (totalLoans, overDueItems);
     }
 }

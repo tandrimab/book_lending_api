@@ -26,7 +26,7 @@ public class MembersController : ControllerBase
     [HttpPost]
     public IActionResult Create(CreateMemberRequest request)
     {
-        var member = new Member(request.Name, request.Address, DateTime.Now);
+        var member = new Member(request.Name, request.Address, DateTime.UtcNow);
         _members.AddMember(member);
 
         return CreatedAtAction(nameof(GetById), new { id = member.Id }, member);
