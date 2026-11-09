@@ -1,9 +1,10 @@
 using BookLending.Domain.Loans;
 using BookLending.Domain.Reminders;
-using BookLending.Domain.Greetings;
 using BookLending.Domain.Items;
 using BookLending.Domain.Members;
-using BookLending.Api.Repositories;
+using BookLending.Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
+using BookLending.Infrastructure.Persistence;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -11,11 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddSingleton<LoanService>();
-builder.Services.AddSingleton<IBookRepository, InMemoryBookRepository>();
-builder.Services.AddSingleton<IMemberRepository, InMemoryMemberRepository>();
+builder.Services.AddScoped<IBookRepository, EfBookRepository>();
+builder.Services.AddScoped<IMemberRepository, EfMemberRepository>();
 builder.Services.AddSingleton<IReminderSender, EmailReminder>();
 builder.Services.AddControllers();
-builder.Services.AddScoped<GreetingService>();
+builder.Services.AddDbContext<BookLendingDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("BookLending")));
 
 var app = builder.Build();
 
@@ -40,10 +41,5 @@ app.Use(async (context, next) =>
     Console.WriteLine($"<-- {context.Request.Method} {context.Request.Path} completed in {sw.ElapsedMilliseconds} ms");
 });
 
-app.MapGet("/greet/{name}", (string name, GreetingService greetServ) =>
-{
-    var greet = greetServ.Greet(name);
-    return Results.Ok(new { greet });
-});
 app.MapControllers();
 app.Run();
