@@ -57,7 +57,7 @@ public class LoansController : ControllerBase
 
     [HttpGet("overdue")]
     public IActionResult GetOverdue() =>
-        Ok(_loanService.GetOverdueLoans(DateTime.Now).Select(LoanResponse.From));
+        Ok(_loanService.GetOverdueLoans(DateTime.UtcNow).Select(LoanResponse.From));
 
     [HttpPost]
     public IActionResult LendBook(LendBookRequest request)

@@ -15,7 +15,7 @@ public class LoanService
         if (member == null) throw new ArgumentNullException(nameof(member));
         if (book == null) throw new ArgumentNullException(nameof(book));
 
-        var loanDate = DateTime.Now;
+        var loanDate = DateTime.UtcNow;
 
         var loan = new Loan(member.Id, book.Id, loanDate, null, book.LoanPeriod());
         LoanItems.Add(loan);
@@ -27,7 +27,7 @@ public class LoanService
         if (loan == null) throw new ArgumentNullException(nameof(loan));
         if (!loan.IsActive()) throw new InvalidOperationException("Loan is not active.");
 
-        loan.MarkAsReturned(DateTime.Now);
+        loan.MarkAsReturned(DateTime.UtcNow);
     }
 
     public IEnumerable<Loan> GetOverdueLoans(DateTime currentDate)
