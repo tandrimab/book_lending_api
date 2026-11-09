@@ -5,6 +5,11 @@ using BookLending.Domain.Members;
 public class LoanService
 {
     public List<Loan> LoanItems { get; private set; } = new List<Loan>();
+
+    public IEnumerable<Loan> GetAllLoans() => LoanItems;
+
+    public Loan? GetLoanById(string id) => LoanItems.FirstOrDefault(loan => loan.Id == id);
+
     public Loan LendBook(Member member, Book book)
     {
         if (member == null) throw new ArgumentNullException(nameof(member));
@@ -12,7 +17,7 @@ public class LoanService
 
         var loanDate = DateTime.Now;
 
-        var loan = new Loan(member.Id, loanDate, null, book.LoanPeriod());
+        var loan = new Loan(member.Id, book.Id, loanDate, null, book.LoanPeriod());
         LoanItems.Add(loan);
         return loan;
     }

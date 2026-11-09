@@ -41,16 +41,16 @@ Section("Members");
 Check("Member stores name", alice.Name == "Alice");
 Check("Address record has value equality", alice.Address == new Address("221B Baker St", "London", "LDN", "NW16XE"));
 Check("'with' expression creates a modified copy", bob.Address.Street == "10 Downing St" && bob.Address.City == "London");
-Check("Member has an Id (currently never assigned in Member)", alice.Id is not null);
+Check("Member has an Id", !string.IsNullOrEmpty(alice.Id));
 
 Section("Loan entity");
-var freshLoan = new Loan("m1", DateTime.Now, null, 14);
+var freshLoan = new Loan("m1", "b1", DateTime.Now, null, 14);
 Check("New loan is active", freshLoan.IsActive());
 Check("New loan is not overdue", !freshLoan.IsOverdue());
 Check("DueDate = LoanDate + loanDays", freshLoan.DueDate == freshLoan.LoanDate.AddDays(14));
 Check("DaysOverDue is 0 for a fresh loan", freshLoan.DaysOverDue() == 0);
 
-var oldLoan = new Loan("m1", DateTime.Now.AddDays(-20), null, 14);
+var oldLoan = new Loan("m1", "b1", DateTime.Now.AddDays(-20), null, 14);
 Check("Loan past due date is overdue", oldLoan.IsOverdue());
 Check("DaysOverDue = 6 for loan taken 20 days ago with 14-day period", oldLoan.DaysOverDue() == 6);
 
@@ -59,11 +59,11 @@ Check("Returned loan is not active", !oldLoan.IsActive());
 Check("Returned loan is not overdue even if past due", !oldLoan.IsOverdue());
 Check("Returned loan has 0 DaysOverDue", oldLoan.DaysOverDue() == 0);
 
-var a = new Loan("m1", DateTime.Now, null, 1);
-var b = new Loan("m1", DateTime.Now, null, 1);
+var a = new Loan("m1", "b1", DateTime.Now, null, 1);
+var b = new Loan("m1", "b1", DateTime.Now, null, 1);
 Check("Loan Ids are unique", a.Id != b.Id);
 
-var boundary = new Loan("m1", DateTime.Now.AddDays(-14).AddMinutes(1), null, 14);
+var boundary = new Loan("m1", "b1", DateTime.Now.AddDays(-14).AddMinutes(1), null, 14);
 Check("Loan due in 1 minute is not yet overdue (boundary)", !boundary.IsOverdue());
 
 Section("LoanService.LendBook");
@@ -89,9 +89,9 @@ Throws<ArgumentNullException>("ReturnBook(null) throws", () => service.ReturnBoo
 
 Section("LoanService overdue & stats");
 // LendBook always uses DateTime.Now, so add back-dated loans directly to simulate overdue ones.
-var overdue1 = new Loan(alice.Id, DateTime.Now.AddDays(-30), null, cleanCode.LoanPeriod()); // 16 days overdue
-var overdue2 = new Loan(bob.Id, DateTime.Now.AddDays(-10), null, natGeo.LoanPeriod());      // 3 days overdue
-var overdueButReturned = new Loan(bob.Id, DateTime.Now.AddDays(-30), DateTime.Now.AddDays(-1), 14);
+var overdue1 = new Loan(alice.Id, cleanCode.Id, DateTime.Now.AddDays(-30), null, cleanCode.LoanPeriod()); // 16 days overdue
+var overdue2 = new Loan(bob.Id, natGeo.Id, DateTime.Now.AddDays(-10), null, natGeo.LoanPeriod());      // 3 days overdue
+var overdueButReturned = new Loan(bob.Id, ddd.Id, DateTime.Now.AddDays(-30), DateTime.Now.AddDays(-1), 14);
 service.LoanItems.AddRange([overdue1, overdue2, overdueButReturned]);
 
 var overdue = service.GetOverdueLoans(DateTime.Now).ToList();

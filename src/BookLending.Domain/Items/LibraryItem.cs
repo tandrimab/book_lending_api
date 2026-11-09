@@ -2,16 +2,18 @@ namespace BookLending.Domain.Items
 {
     public abstract class LibraryItem
     {
-        private static int _idCounter = 0;
-        private string Id;
-        public string Title { get; set; }
-        public string Author { get; set; }
+        public string Id { get; private set; } = null!;
+        public string Title { get; set; } = null!;
+        public string Author { get; set; } = null!;
         public int Year { get; set; }
         public virtual int LoanPeriod() => 7;
 
+        // For EF Core: lets derived classes' parameterless constructors chain to a base constructor.
+        protected LibraryItem() { }
+
         protected LibraryItem(string title, string author, int year)
         {
-            this.Id = (++_idCounter).ToString();
+            Id = Guid.NewGuid().ToString();
             Title = title;
             Author = author;
             Year = year;
