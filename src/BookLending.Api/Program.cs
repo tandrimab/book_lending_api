@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
+builder.Services.AddScoped<LoanService>();
 builder.Services.AddScoped<IBookRepository, EfBookRepository>();
 builder.Services.AddScoped<IMemberRepository, EfMemberRepository>();
 builder.Services.AddScoped<ILoanRepository, EfLoanRepository>();
