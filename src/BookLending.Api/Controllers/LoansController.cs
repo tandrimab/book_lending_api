@@ -15,11 +15,15 @@ public record LoanResponse(
     DateTime? ReturnedOn,
     bool IsActive,
     bool IsOverdue,
-    int DaysOverdue)
+    int DaysOverdue,
+    string? BookTitle)
 {
-    public static LoanResponse From(Loan loan) => new(
+    // Endpoints that don't load the book: BookTitle is null ("not loaded"), never a fake "".
+    public static LoanResponse From(Loan loan) => From(loan, null);
+
+    public static LoanResponse From(Loan loan, string? bookTitle) => new(
         loan.Id, loan.MemberId, loan.LoanDate, loan.DueDate, loan.ReturnedOn,
-        loan.IsActive(), loan.IsOverdue(), loan.DaysOverDue());
+        loan.IsActive(), loan.IsOverdue(), loan.DaysOverDue(), bookTitle);
 }
 
 [ApiController]
@@ -39,7 +43,7 @@ public class LoansController : ControllerBase
 
     [HttpGet]
     public IActionResult GetAll() =>
-        Ok(_loanService.GetAllLoans().Select(LoanResponse.From));
+        Ok(_loanService.GetLoansWithBookTitles().Select(x => LoanResponse.From(x.Loan, x.BookTitle)));
 
     [HttpGet("{id}")]
     public IActionResult GetById(string id)

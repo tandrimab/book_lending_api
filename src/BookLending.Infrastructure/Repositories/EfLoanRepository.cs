@@ -43,5 +43,20 @@ namespace BookLending.Infrastructure.Repositories
             _context.SaveChanges();
         }
 
+        public IEnumerable<(Loan Loan, string BookTitle)> GetLoansWithBookTitles()
+        {
+            // TODO: join _context.Loans with _context.Books on l.BookId == b.Id
+            //       select (l, b.Title), AsNoTracking, ToList
+            //       Query syntax may read easier here:
+            //       from l in _context.Loans
+            //       join b in _context.Books on l.BookId equals b.Id
+            //       select new { l, b.Title }
+            var query = from l in _context.Loans
+                        join b in _context.Books on l.BookId equals b.Id
+                        select new { Loan = l, BookTitle = b.Title };
+            return query.AsNoTracking().ToList().Select(x => (x.Loan, x.BookTitle));
+        }
+
+
     }
 }

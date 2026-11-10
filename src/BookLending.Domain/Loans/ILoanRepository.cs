@@ -7,5 +7,6 @@ namespace BookLending.Domain.Loans
         IEnumerable<Loan> GetOverdueLoans(DateTime asOf);
         void AddLoan(Loan loan);
         void Update(Loan loan);
+        IEnumerable<(Loan Loan, string BookTitle)> GetLoansWithBookTitles();
     }
 }

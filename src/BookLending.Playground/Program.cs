@@ -138,4 +138,7 @@ class InMemoryLoanRepository : ILoanRepository
         Loans.Where(l => l.ReturnedOn == null && l.DueDate < asOf).ToList();
     public void AddLoan(Loan loan) => Loans.Add(loan);
     public void Update(Loan loan) { } // the list holds the same object, so the change is already "saved"
+    // No books in the Playground, so there is no title to join with.
+    public IEnumerable<(Loan Loan, string BookTitle)> GetLoansWithBookTitles() =>
+        Loans.Select(l => (l, string.Empty));
 }

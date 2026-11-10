@@ -16,6 +16,9 @@ public class LoanService
 
     public Loan? GetLoanById(string id) => _loanRepository.GetLoanById(id);
 
+    public IEnumerable<(Loan Loan, string BookTitle)> GetLoansWithBookTitles() =>
+        _loanRepository.GetLoansWithBookTitles();
+
     public Loan LendBook(Member member, Book book)
     {
         if (member == null) throw new ArgumentNullException(nameof(member));
