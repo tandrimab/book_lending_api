@@ -24,8 +24,7 @@ CREATE OR ALTER PROCEDURE dbo.usp_CreateLoan
     @MemberId NVARCHAR(36),
     @BookId   NVARCHAR(36),
     @LoanDate DATETIME2,
-    @DueDate  DATETIME2,
-    @ReturnedOn DATETIME2
+    @DueDate  DATETIME2
     AS
     BEGIN
         SET NOCOUNT ON;
