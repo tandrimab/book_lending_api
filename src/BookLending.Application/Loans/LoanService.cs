@@ -1,7 +1,7 @@
 using BookLending.Domain.Items;
 using BookLending.Domain.Members;
-
-namespace BookLending.Domain.Loans;
+using BookLending.Domain.Loans;
+namespace BookLending.Application.Loans;
 
 public class LoanService
 {
