@@ -19,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BookLending.Domain\BookLending.Domain.csproj" />
     <ProjectReference Include="..\BookLending.Infrastructure\BookLending.Infrastructure.csproj" />
+    <ProjectReference Include="..\BookLending.Application\BookLending.Application.csproj" />
   </ItemGroup>
 
 </Project>
