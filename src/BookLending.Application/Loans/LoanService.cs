@@ -1,7 +1,7 @@
 using BookLending.Domain.Items;
 using BookLending.Domain.Members;
-
-namespace BookLending.Domain.Loans;
+using BookLending.Domain.Loans;
+namespace BookLending.Application.Loans;
 
 public class LoanService
 {
@@ -15,6 +15,9 @@ public class LoanService
     public IEnumerable<Loan> GetAllLoans() => _loanRepository.GetAllLoans();
 
     public Loan? GetLoanById(string id) => _loanRepository.GetLoanById(id);
+
+    public IEnumerable<(Loan Loan, string BookTitle)> GetLoansWithBookTitles() =>
+        _loanRepository.GetLoansWithBookTitles();
 
     public Loan LendBook(Member member, Book book)
     {

@@ -1,5 +1,7 @@
 using BookLending.Domain.Members;
 using BookLending.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+
 namespace BookLending.Infrastructure.Repositories;
 
 public class EfMemberRepository : IMemberRepository
@@ -13,12 +15,12 @@ public class EfMemberRepository : IMemberRepository
 
     public IEnumerable<Member> GetAllMembers()
     {
-        return _context.Members.ToList();
+        return _context.Members.AsNoTracking().ToList();
     }
 
     public Member? GetMemberById(string id)
     {
-        return _context.Members.Find(id);
+        return _context.Members.AsNoTracking().FirstOrDefault(m => m.Id == id);
     }
 
     public void AddMember(Member member)

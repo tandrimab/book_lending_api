@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.14" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.14" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.14">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -19,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BookLending.Domain\BookLending.Domain.csproj" />
     <ProjectReference Include="..\BookLending.Infrastructure\BookLending.Infrastructure.csproj" />
+    <ProjectReference Include="..\BookLending.Application\BookLending.Application.csproj" />
   </ItemGroup>
 
 </Project>

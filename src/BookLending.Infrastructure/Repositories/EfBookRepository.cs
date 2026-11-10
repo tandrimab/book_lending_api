@@ -1,5 +1,6 @@
 using BookLending.Domain.Items;
 using BookLending.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 namespace BookLending.Infrastructure.Repositories;
 
 public class EfBookRepository : IBookRepository
@@ -12,12 +13,12 @@ public class EfBookRepository : IBookRepository
 
     public IEnumerable<Book> GetAllBooks()
     {
-        return _context.Books.ToList();
+        return _context.Books.AsNoTracking().ToList();
     }
 
     public Book? GetBookBYIsbn(string isbn)
     {
-        return _context.Books.FirstOrDefault(b => b.Isbn == new IsbnNumber(isbn));
+        return _context.Books.AsNoTracking().FirstOrDefault(b => b.Isbn == new IsbnNumber(isbn));
     }
 
     public void AddBook(Book book)

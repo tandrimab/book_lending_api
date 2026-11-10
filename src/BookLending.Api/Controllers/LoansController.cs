@@ -2,7 +2,8 @@ using BookLending.Domain.Items;
 using BookLending.Domain.Loans;
 using BookLending.Domain.Members;
 using Microsoft.AspNetCore.Mvc;
-
+using BookLending.Application.Loans;
+using Microsoft.AspNetCore.Authorization;
 namespace BookLending.Api.Controllers;
 
 public record LendBookRequest(string MemberId, string Isbn);
@@ -15,14 +16,19 @@ public record LoanResponse(
     DateTime? ReturnedOn,
     bool IsActive,
     bool IsOverdue,
-    int DaysOverdue)
+    int DaysOverdue,
+    string? BookTitle)
 {
-    public static LoanResponse From(Loan loan) => new(
+    // Endpoints that don't load the book: BookTitle is null ("not loaded"), never a fake "".
+    public static LoanResponse From(Loan loan) => From(loan, null);
+
+    public static LoanResponse From(Loan loan, string? bookTitle) => new(
         loan.Id, loan.MemberId, loan.LoanDate, loan.DueDate, loan.ReturnedOn,
-        loan.IsActive(), loan.IsOverdue(), loan.DaysOverDue());
+        loan.IsActive(), loan.IsOverdue(), loan.DaysOverDue(), bookTitle);
 }
 
 [ApiController]
+[Authorize(Roles = "Librarian")]
 [Route("loans")]
 public class LoansController : ControllerBase
 {
@@ -38,14 +44,15 @@ public class LoansController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetAll() =>
-        Ok(_loanService.GetAllLoans().Select(LoanResponse.From));
+    public ActionResult<IEnumerable<LoanResponse>> GetAll() =>
+        Ok(_loanService.GetLoansWithBookTitles().Select(x => LoanResponse.From(x.Loan, x.BookTitle)));
 
     [HttpGet("{id}")]
-    public IActionResult GetById(string id)
+    public ActionResult<LoanResponse> GetById(string id)
     {
         var loan = _loanService.GetLoanById(id);
-        return loan is null ? NotFound() : Ok(LoanResponse.From(loan));
+        if (loan is null) return NotFound();
+        return LoanResponse.From(loan);
     }
 
     [HttpGet("stats")]
@@ -56,11 +63,11 @@ public class LoansController : ControllerBase
     }
 
     [HttpGet("overdue")]
-    public IActionResult GetOverdue() =>
+    public ActionResult<IEnumerable<LoanResponse>> GetOverdue() =>
         Ok(_loanService.GetOverdueLoans(DateTime.UtcNow).Select(LoanResponse.From));
 
     [HttpPost]
-    public IActionResult LendBook(LendBookRequest request)
+    public ActionResult<LoanResponse> LendBook(LendBookRequest request)
     {
 
         var member = _members.GetMemberById(request.MemberId);
@@ -75,7 +82,7 @@ public class LoansController : ControllerBase
     }
 
     [HttpPost("{id}/return")]
-    public IActionResult ReturnBook(string id)
+    public ActionResult<LoanResponse> ReturnBook(string id)
     {
         var loan = _loanService.GetLoanById(id);
         if (loan is null) return NotFound();
@@ -83,6 +90,6 @@ public class LoansController : ControllerBase
         if (!loan.IsActive()) return Conflict($"Loan '{id}' has already been returned.");
 
         _loanService.ReturnBook(loan);
-        return Ok(LoanResponse.From(loan));
+        return LoanResponse.From(loan);
     }
 }
