@@ -56,18 +56,15 @@ public class LoansController : ControllerBase
     }
 
     [HttpGet("stats")]
-    public IActionResult GetStats()
-    {
-        var (total, overdue) = _loanService.GetLoanStats();
-        return Ok(new { total, overdue });
-    }
+    public async Task<ActionResult<LoanService.LoanStats>> GetStats() =>
+        await _loanService.GetLoanStatsAsync();
 
     [HttpGet("overdue")]
     public ActionResult<IEnumerable<LoanResponse>> GetOverdue() =>
         Ok(_loanService.GetOverdueLoans(DateTime.UtcNow).Select(LoanResponse.From));
 
     [HttpPost]
-    public ActionResult<LoanResponse> LendBook(LendBookRequest request)
+    public async Task<ActionResult<LoanResponse>> LendBook(LendBookRequest request)
     {
 
         var member = _members.GetMemberById(request.MemberId);
@@ -76,20 +73,20 @@ public class LoansController : ControllerBase
         var book = _books.GetBookBYIsbn(request.Isbn);
         if (book is null) return NotFound($"Book with ISBN '{request.Isbn}' not found.");
 
-        var loan = _loanService.LendBook(member, book);
+        var loan = await _loanService.LendBookAsync(member, book);
 
         return CreatedAtAction(nameof(GetById), new { id = loan.Id }, LoanResponse.From(loan));
     }
 
     [HttpPost("{id}/return")]
-    public ActionResult<LoanResponse> ReturnBook(string id)
+    public async Task<ActionResult<LoanResponse>> ReturnBook(string id)
     {
         var loan = _loanService.GetLoanById(id);
         if (loan is null) return NotFound();
 
         if (!loan.IsActive()) return Conflict($"Loan '{id}' has already been returned.");
 
-        _loanService.ReturnBook(loan);
+        await _loanService.ReturnBookAsync(loan);
         return LoanResponse.From(loan);
     }
 }

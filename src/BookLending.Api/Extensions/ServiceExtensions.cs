@@ -37,6 +37,20 @@ public static class ServiceExtensions
         return services;
     }
 
+    public static IServiceCollection AddRedisCache(this IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("Redis")
+            ?? throw new InvalidOperationException("Missing connection string 'Redis'.");
+
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = connectionString;
+            options.InstanceName = "booklending:"; // prefix on every key, so apps sharing a Redis don't collide
+        });
+
+        return services;
+    }
+
     private static string GetRequired(IConfiguration configuration, string key) =>
         configuration[key] ?? throw new InvalidOperationException($"Missing configuration value '{key}'.");
 }
