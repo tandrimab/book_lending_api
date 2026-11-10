@@ -1,5 +1,6 @@
 using BookLending.Infrastructure.Persistence;
 using BookLending.Domain.Loans;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookLending.Infrastructure.Repositories
 {
@@ -14,12 +15,12 @@ namespace BookLending.Infrastructure.Repositories
 
         public IEnumerable<Loan> GetAllLoans()
         {
-            return _context.Loans.ToList();
+            return _context.Loans.AsNoTracking().ToList();
         }
 
         public Loan? GetLoanById(string id)
         {
-            return _context.Loans.FirstOrDefault(l => l.Id == id);
+            return _context.Loans.AsNoTracking().FirstOrDefault(l => l.Id == id);
         }
 
         public void AddLoan(Loan loan)
@@ -32,6 +33,7 @@ namespace BookLending.Infrastructure.Repositories
         {
             return _context.Loans
                 .Where(l => l.DueDate < asOf && l.ReturnedOn == null)
+                .AsNoTracking()
                 .ToList();
         }
 
