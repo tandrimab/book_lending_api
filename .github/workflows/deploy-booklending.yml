@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 env:
-  AZURE_WEBAPP_NAME: booklending-api
+  AZURE_WEBAPP_NAME: booklending-api-
   API_PROJECT: src/BookLending.Api/BookLending.Api.csproj
   DOTNET_VERSION: "10.0"
 
