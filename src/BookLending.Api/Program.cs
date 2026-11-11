@@ -23,6 +23,7 @@ builder.Services.AddSingleton<IReminderSender, EmailReminder>();
 builder.Services.AddControllers();
 builder.Services.AddDbContext<BookLendingDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("BookLending")));
 builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddRedisCache(builder.Configuration);
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 var app = builder.Build();

@@ -6,13 +6,8 @@ namespace BookLending.Api.Extensions;
 
 public static class ServiceExtensions
 {
-    /// <summary>
-    /// Validates incoming "Authorization: Bearer ..." tokens.
-    /// Must use the SAME issuer, audience and key that AuthService uses to issue them.
-    /// </summary>
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
-        // Fail at startup if anything is missing, rather than rejecting every token at runtime.
         var issuer = GetRequired(configuration, "Jwt:Issuer");
         var audience = GetRequired(configuration, "Jwt:Audience");
         var key = GetRequired(configuration, "Jwt:Key");
@@ -23,17 +18,31 @@ public static class ServiceExtensions
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = true,            // iss must match: who issued the token
+                    ValidateIssuer = true,
                     ValidIssuer = issuer,
-                    ValidateAudience = true,          // aud must match: who the token is for
+                    ValidateAudience = true,
                     ValidAudience = audience,
-                    ValidateLifetime = true,          // exp must be in the future (default 5 min clock skew)
-                    ValidateIssuerSigningKey = true,  // signature must verify: nobody tampered with it
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
                 };
             });
 
         services.AddAuthorization();
+        return services;
+    }
+
+    public static IServiceCollection AddRedisCache(this IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("Redis")
+            ?? throw new InvalidOperationException("Missing connection string 'Redis'.");
+
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = connectionString;
+            options.InstanceName = "booklending:";
+        });
+
         return services;
     }
 
