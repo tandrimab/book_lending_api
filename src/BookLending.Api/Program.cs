@@ -7,13 +7,19 @@ using BookLending.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using BookLending.Infrastructure.Persistence;
 using BookLending.Api.Extensions;
+using BookLending.Api.OpenApi;
 using BookLending.Application.Auth;
 using BookLending.Infrastructure.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    // Declares JWT Bearer auth so Swagger UI shows the Authorize button.
+    options.AddDocumentTransformer<BearerSecurityTransformer>();
+    options.AddOperationTransformer<BearerSecurityTransformer>();
+});
 builder.Services.AddProblemDetails();
 builder.Services.AddScoped<LoanService>();
 builder.Services.AddScoped<IBookRepository, EfBookRepository>();
@@ -37,8 +43,8 @@ app.Use(async (context, next) =>
     Console.WriteLine($"<-- {context.Request.Method} {context.Request.Path} completed in {sw.ElapsedMilliseconds} ms");
 });
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Swagger:Enabled"))
 {
     app.MapOpenApi();
     app.UseSwaggerUI(options =>
@@ -46,7 +52,8 @@ if (app.Environment.IsDevelopment())
         options.SwaggerEndpoint("/openapi/v1.json", "Book Lending API V1");
     });
 }
-else
+
+if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler();
     app.UseHsts();
