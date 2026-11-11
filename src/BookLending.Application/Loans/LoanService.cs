@@ -3,6 +3,7 @@ using BookLending.Domain.Members;
 using BookLending.Domain.Loans;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
+using BookLending.Application.Messaging;
 namespace BookLending.Application.Loans;
 
 public class LoanService
@@ -22,11 +23,13 @@ public class LoanService
 
     private readonly ILoanRepository _loanRepository;
     private readonly IDistributedCache _cache;
+    private readonly IMessagePublisher _publisher;
 
-    public LoanService(ILoanRepository loanRepository, IDistributedCache cache)
+    public LoanService(ILoanRepository loanRepository, IDistributedCache cache, IMessagePublisher publisher)
     {
         _loanRepository = loanRepository;
         _cache = cache;
+        _publisher = publisher;
     }
 
     public IEnumerable<Loan> GetAllLoans() => _loanRepository.GetAllLoans();
@@ -63,6 +66,10 @@ public class LoanService
         var loan = new Loan(member.Id, book.Id, loanDate, null, book.LoanPeriod());
         _loanRepository.AddLoan(loan);
         await InvalidateStatsAsync(); // total just changed
+
+        // Hand the reminder off to the background instead of sending it here.
+        // The request returns as soon as the message is on the queue.
+        await _publisher.PublishAsync(new LoanCreated(loan.Id, loan.MemberId, loan.BookId, loan.DueDate));
         return loan;
     }
 
