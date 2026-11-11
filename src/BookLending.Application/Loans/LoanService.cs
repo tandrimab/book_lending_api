@@ -8,12 +8,16 @@ namespace BookLending.Application.Loans;
 public class LoanService
 {
     private const string StatsCacheKey = "loans:stats";
+    private static string LoanCacheKey(string id) => $"loan:{id}";
 
-    // Overdue count depends on the clock, so even with no writes the cached value
-    // drifts. A short expiry bounds how stale it can get.
     private static readonly DistributedCacheEntryOptions StatsCacheOptions = new()
     {
         AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60)
+    };
+
+    private static readonly DistributedCacheEntryOptions LoanCacheOptions = new()
+    {
+        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
     };
 
     private readonly ILoanRepository _loanRepository;
@@ -28,6 +32,23 @@ public class LoanService
     public IEnumerable<Loan> GetAllLoans() => _loanRepository.GetAllLoans();
 
     public Loan? GetLoanById(string id) => _loanRepository.GetLoanById(id);
+
+    // Cached, for READS. Cache-aside, same shape as GetLoanStatsAsync.
+    public async Task<Loan?> GetLoanByIdAsync(string id)
+    {
+        var key = LoanCacheKey(id);
+
+        var cached = await _cache.GetStringAsync(key);
+        if (cached is not null)
+            return JsonSerializer.Deserialize<LoanCacheItem>(cached)!.ToLoan();
+
+        var loan = _loanRepository.GetLoanById(id);
+        if (loan is null)
+            return null;
+
+        await _cache.SetStringAsync(key, JsonSerializer.Serialize(LoanCacheItem.From(loan)), LoanCacheOptions);
+        return loan;
+    }
 
     public IEnumerable<(Loan Loan, string BookTitle)> GetLoansWithBookTitles() =>
         _loanRepository.GetLoansWithBookTitles();
@@ -52,6 +73,7 @@ public class LoanService
 
         loan.MarkAsReturned(DateTime.UtcNow);
         _loanRepository.Update(loan);
+        await _cache.RemoveAsync(LoanCacheKey(loan.Id));
         await InvalidateStatsAsync();
     }
 

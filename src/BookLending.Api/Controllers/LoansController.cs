@@ -48,9 +48,9 @@ public class LoansController : ControllerBase
         Ok(_loanService.GetLoansWithBookTitles().Select(x => LoanResponse.From(x.Loan, x.BookTitle)));
 
     [HttpGet("{id}")]
-    public ActionResult<LoanResponse> GetById(string id)
+    public async Task<ActionResult<LoanResponse>> GetById(string id)
     {
-        var loan = _loanService.GetLoanById(id);
+        var loan = await _loanService.GetLoanByIdAsync(id);
         if (loan is null) return NotFound();
         return LoanResponse.From(loan);
     }

@@ -22,6 +22,17 @@ namespace BookLending.Domain.Loans
             ReturnedOn = returnedOn;
         }
 
+        public static Loan Restore(string id, string memberId, string bookId,
+            DateTime loanDate, DateTime dueDate, DateTime? returnedOn) => new()
+            {
+                Id = id,
+                MemberId = memberId,
+                BookId = bookId,
+                LoanDate = loanDate,
+                DueDate = dueDate,
+                ReturnedOn = returnedOn
+            };
+
         public bool IsActive() => ReturnedOn == null;
 
         public bool IsOverdue() => IsActive() && DateTime.UtcNow > DueDate;
