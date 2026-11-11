@@ -1,6 +1,8 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/BookLending.Api/BookLending.Api.csproj" />
+    <Project Path="src/BookLending.Application/BookLending.Application.csproj" />
     <Project Path="src/BookLending.Domain/BookLending.Domain.csproj" />
-    <Project Path="src/BookLending.Playground/BookLending.Playground.csproj" />
+    <Project Path="src/BookLending.Infrastructure/BookLending.Infrastructure.csproj" />
   </Folder>
 </Solution>

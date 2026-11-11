@@ -3,8 +3,10 @@ namespace BookLending.Domain.Items
     public record struct IsbnNumber(string Value);
     public class Book : LibraryItem
     {
+        // For EF Core: used when materializing rows from the database.
+        private Book() { }
         public IsbnNumber Isbn { get; private set; }
-        public string Publisher { get; private set; }
+        public string Publisher { get; private set; } = null!;
 
         public override int LoanPeriod() => 14;
         public Book(string title, string author, int year, string publisher, IsbnNumber isbn) : base(title, author, year)
