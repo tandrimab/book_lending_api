@@ -1,6 +1,8 @@
 using BookLending.Domain.Items;
 using BookLending.Domain.Members;
 using BookLending.Domain.Loans;
+using BookLending.Application.Loans.Events;
+using BookLending.Application.Messaging;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
 namespace BookLending.Application.Loans;
@@ -22,11 +24,13 @@ public class LoanService
 
     private readonly ILoanRepository _loanRepository;
     private readonly IDistributedCache _cache;
+    private readonly IEventPublisher _eventPublisher;
 
-    public LoanService(ILoanRepository loanRepository, IDistributedCache cache)
+    public LoanService(ILoanRepository loanRepository, IDistributedCache cache, IEventPublisher eventPublisher)
     {
         _loanRepository = loanRepository;
         _cache = cache;
+        _eventPublisher = eventPublisher;
     }
 
     public IEnumerable<Loan> GetAllLoans() => _loanRepository.GetAllLoans();
@@ -75,6 +79,10 @@ public class LoanService
         _loanRepository.Update(loan);
         await _cache.RemoveAsync(LoanCacheKey(loan.Id));
         await InvalidateStatsAsync();
+
+        await _eventPublisher.PublishAsync(
+            QueueNames.BookReturned,
+            new BookReturnedEvent(loan.Id, loan.BookId, loan.ReturnedOn!.Value));
     }
 
     public IEnumerable<Loan> GetOverdueLoans(DateTime currentDate) =>
