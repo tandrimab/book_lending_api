@@ -1,5 +1,7 @@
 using BookLending.Domain.Loans;
 using BookLending.Application.Loans;
+using BookLending.Application.Reservations;
+using BookLending.Infrastructure;
 using BookLending.Domain.Reminders;
 using BookLending.Domain.Items;
 using BookLending.Domain.Members;
@@ -15,13 +17,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
+builder.Services.AddInfrastructure(builder.Configuration); // DbContext, repositories, Service Bus
 builder.Services.AddScoped<LoanService>();
-builder.Services.AddScoped<IBookRepository, EfBookRepository>();
-builder.Services.AddScoped<IMemberRepository, EfMemberRepository>();
-builder.Services.AddScoped<ILoanRepository, EfLoanRepository>();
-builder.Services.AddSingleton<IReminderSender, EmailReminder>();
+builder.Services.AddScoped<ReservationService>();
 builder.Services.AddControllers();
-builder.Services.AddDbContext<BookLendingDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("BookLending")));
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddRedisCache(builder.Configuration);
 builder.Services.AddScoped<IAuthService, AuthService>();
