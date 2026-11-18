@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using BookLending.Domain.Items;
 using BookLending.Domain.Loans;
 using BookLending.Domain.Members;
+using BookLending.Domain.Reservations;
 namespace BookLending.Infrastructure.Persistence;
 
 public class BookLendingDbContext : DbContext
@@ -13,6 +14,8 @@ public class BookLendingDbContext : DbContext
     public DbSet<Loan> Loans => Set<Loan>();
 
     public DbSet<Member> Members => Set<Member>();
+
+    public DbSet<Reservation> Reservations => Set<Reservation>();
 
     override protected void OnModelCreating(ModelBuilder modelBuilder)
     {
