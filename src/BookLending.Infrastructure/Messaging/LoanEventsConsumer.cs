@@ -1,5 +1,6 @@
 using Azure.Messaging.ServiceBus;
 using BookLending.Application.Loans;
+using BookLending.Application.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -22,6 +23,14 @@ public sealed class LoanEventsConsumer : BackgroundService
     private readonly ServiceBusProcessor _processor;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<LoanEventsConsumer> _logger;
+
+    /// <summary>
+    /// Constructor parameter:
+    /// ServiceBusClient client -> DependencyInjection AddSingleton(_ => new ServiceBusClient(connectionString)
+    /// ServiceBusSettings settings -> built from ServiceBus:LoanEventsQueue in config, then AddSingleton(settings)
+    /// IServiceScopeFactory scopeFactory => built into the framework. registered automatically
+    /// ILogger<LoanEventsConsumer> logger -> Built into the framework (WebApplication.CreateBuilder adds logging)
+    /// </summary>
 
     public LoanEventsConsumer(
         ServiceBusClient client,
@@ -66,15 +75,12 @@ public sealed class LoanEventsConsumer : BackgroundService
 
         if (message.Subject != nameof(LoanCreated))
         {
-            // Retrying can't help a message nobody knows how to handle. Park it for inspection.
             await args.DeadLetterMessageAsync(message, "UnknownSubject", $"No handler for '{message.Subject}'.");
             return;
         }
 
         var loanCreated = message.Body.ToObjectFromJson<LoanCreated>()!;
 
-        // This class is a Singleton, but the handler needs Scoped services
-        // (IMemberRepository → DbContext). Create a scope per message, like a mini request.
         using var scope = _scopeFactory.CreateScope();
         var handler = scope.ServiceProvider.GetRequiredService<LoanCreatedHandler>();
         await handler.HandleAsync(loanCreated, args.CancellationToken);

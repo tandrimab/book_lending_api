@@ -1,13 +1,6 @@
-using BookLending.Domain.Loans;
 using BookLending.Application.Loans;
 using BookLending.Application.Reservations;
 using BookLending.Infrastructure;
-using BookLending.Domain.Reminders;
-using BookLending.Domain.Items;
-using BookLending.Domain.Members;
-using BookLending.Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore;
-using BookLending.Infrastructure.Persistence;
 using BookLending.Api.Extensions;
 using BookLending.Api.OpenApi;
 using BookLending.Application.Auth;
