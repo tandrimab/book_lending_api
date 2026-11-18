@@ -6,7 +6,7 @@ using BookLending.Application.Loans;
 using Microsoft.AspNetCore.Authorization;
 namespace BookLending.Api.Controllers;
 
-public record LendBookRequest(string MemberId, string Isbn);
+public record LendBookRequest(string MemberId, string Isbn, DateTime LoanDate, DateTime ReturnedOn);
 
 public record LoanResponse(
     string Id,
@@ -73,7 +73,7 @@ public class LoansController : ControllerBase
         var book = _books.GetBookBYIsbn(request.Isbn);
         if (book is null) return NotFound($"Book with ISBN '{request.Isbn}' not found.");
 
-        var loan = await _loanService.LendBookAsync(member, book);
+        var loan = await _loanService.LendBookAsync(member, book, request.LoanDate, request.ReturnedOn);
 
         return CreatedAtAction(nameof(GetById), new { id = loan.Id }, LoanResponse.From(loan));
     }

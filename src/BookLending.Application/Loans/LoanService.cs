@@ -57,16 +57,17 @@ public class LoanService
     public IEnumerable<(Loan Loan, string BookTitle)> GetLoansWithBookTitles() =>
         _loanRepository.GetLoansWithBookTitles();
 
-    public async Task<Loan> LendBookAsync(Member member, Book book)
+    public async Task<Loan> LendBookAsync(Member member, Book book, DateTime LoanDate, DateTime? ReturnedOn)
     {
         if (member == null) throw new ArgumentNullException(nameof(member));
         if (book == null) throw new ArgumentNullException(nameof(book));
+        if (LoanDate == null) throw new ArgumentNullException(nameof(LoanDate));
 
-        var loanDate = DateTime.UtcNow;
+        var loanDate = LoanDate;
 
-        var loan = new Loan(member.Id, book.Id, loanDate, null, book.LoanPeriod());
+        var loan = new Loan(member.Id, book.Id, loanDate, ReturnedOn, book.LoanPeriod());
         _loanRepository.AddLoan(loan);
-        await InvalidateStatsAsync(); // total just changed
+        await InvalidateStatsAsync();
         return loan;
     }
 
