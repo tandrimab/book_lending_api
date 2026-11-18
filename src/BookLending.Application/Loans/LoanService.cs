@@ -5,7 +5,6 @@ using BookLending.Application.Loans.Events;
 using BookLending.Application.Messaging;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
-using BookLending.Application.Messaging;
 namespace BookLending.Application.Loans;
 
 public class LoanService
@@ -68,10 +67,6 @@ public class LoanService
         var loan = new Loan(member.Id, book.Id, loanDate, null, book.LoanPeriod());
         _loanRepository.AddLoan(loan);
         await InvalidateStatsAsync(); // total just changed
-
-        // Hand the reminder off to the background instead of sending it here.
-        // The request returns as soon as the message is on the queue.
-        await _publisher.PublishAsync(new LoanCreated(loan.Id, loan.MemberId, loan.BookId, loan.DueDate));
         return loan;
     }
 
