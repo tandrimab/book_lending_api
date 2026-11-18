@@ -56,7 +56,7 @@ public static class ServiceExtensions
     /// </summary>
     public static IServiceCollection AddServiceBusMessaging(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("ServiceBusConnection")
+        var connectionString = configuration["ServiceBusConnection"]
             ?? throw new InvalidOperationException("Missing connection string 'ServiceBusConnection'.");
         var settings = new ServiceBusSettings(GetRequired(configuration, "ServiceBus:LoanEventsQueue"));
 
