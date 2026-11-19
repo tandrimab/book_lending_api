@@ -19,6 +19,6 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
             address.Property(a => a.State).HasMaxLength(100).IsRequired();
             address.Property(a => a.ZipCode).HasMaxLength(20).IsRequired();
         });
-        builder.HasIndex(b => b.Email).IsUnique().HasFilter("[Email] IS NOT NULL");
+        builder.HasIndex(b => b.Email).IsUnique();
     }
 }
