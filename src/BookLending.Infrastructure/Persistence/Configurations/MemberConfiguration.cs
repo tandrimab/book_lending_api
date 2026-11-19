@@ -11,6 +11,7 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
         builder.HasKey(b => b.Id);
         builder.Property(b => b.Id).HasMaxLength(36).IsRequired();
         builder.Property(b => b.Name).HasMaxLength(200).IsRequired();
+        builder.Property(b => b.Email).HasMaxLength(100).IsRequired();
         builder.ComplexProperty(b => b.Address, address =>
         {
             address.Property(a => a.Street).HasMaxLength(200).IsRequired();
@@ -18,5 +19,6 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
             address.Property(a => a.State).HasMaxLength(100).IsRequired();
             address.Property(a => a.ZipCode).HasMaxLength(20).IsRequired();
         });
+        builder.HasIndex(b => b.Email).IsUnique().HasFilter("[Email] IS NOT NULL");
     }
 }

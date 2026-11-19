@@ -9,12 +9,15 @@ namespace BookLending.Domain.Members
         public Address Address { get; set; } = null!;
         public DateTime MembershipStartDate { get; set; }
 
-        public Member(string name, Address address, DateTime membershipStartDate)
+        public string? Email { get; set; }
+
+        public Member(string name, Address address, DateTime membershipStartDate, string? email)
         {
             Id = Guid.NewGuid().ToString();
             Name = name;
             Address = address;
             MembershipStartDate = membershipStartDate;
+            Email = email;
         }
     }
 }
