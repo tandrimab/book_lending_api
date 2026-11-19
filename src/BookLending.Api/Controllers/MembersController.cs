@@ -1,9 +1,11 @@
 using BookLending.Domain.Members;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace BookLending.Api.Controllers;
 
-public record CreateMemberRequest(string Name, Address Address);
+public record CreateMemberRequest(string Name, Address Address,
+    [Required, EmailAddress,MaxLength(100)] string Email);
 
 [ApiController]
 [Route("members")]
@@ -26,7 +28,7 @@ public class MembersController : ControllerBase
     [HttpPost]
     public IActionResult Create(CreateMemberRequest request)
     {
-        var member = new Member(request.Name, request.Address, DateTime.UtcNow);
+        var member = new Member(request.Name, request.Address, DateTime.UtcNow, request.Email.Trim().ToLowerInvariant());
         _members.AddMember(member);
 
         return CreatedAtAction(nameof(GetById), new { id = member.Id }, member);
