@@ -5,13 +5,13 @@ using BookLending.Domain.Loans;
 using BookLending.Domain.Members;
 using BookLending.Domain.Reminders;
 using BookLending.Domain.Reservations;
+using BookLending.Infrastructure.Email;
 using BookLending.Infrastructure.Messaging;
 using BookLending.Infrastructure.Persistence;
 using BookLending.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-
 namespace BookLending.Infrastructure;
 
 public static class DependencyInjection
@@ -28,8 +28,7 @@ public static class DependencyInjection
         services.AddScoped<ILoanRepository, EfLoanRepository>();
         services.AddScoped<IReservationRepository, EfReservationRepository>();
 
-        services.AddSingleton<IReminderSender, EmailReminder>();
-
+        services.AddEmail(configuration);
         services.AddMessaging(configuration);
         return services;
     }
@@ -47,4 +46,27 @@ public static class DependencyInjection
         services.AddSingleton<IEventPublisher, ServiceBusEventPublisher>();
         return services;
     }
+
+    private static IServiceCollection AddEmail(this IServiceCollection services, IConfiguration configuration)
+    {
+        var portValue = GetRequired(configuration, "Smtp:Port");
+        if (!int.TryParse(portValue, out var port))
+            throw new InvalidOperationException($"Configuration value 'Smtp:Port' must be a number, but was '{portValue}'.");
+
+        var smtpSettings = new SmtpSettings(
+            GetRequired(configuration, "Smtp:Host"),
+            port,
+            GetRequired(configuration, "Smtp:Username"),
+            GetRequired(configuration, "Smtp:Password"),
+            GetRequired(configuration, "Smtp:FromAddress"));
+
+        services.AddSingleton(smtpSettings);
+        services.AddSingleton<IReminderSender, SmtpEmailReminder>();
+        return services;
+    }
+
+    private static string GetRequired(IConfiguration configuration, string key) =>
+        configuration[key] is { Length: > 0 } value
+            ? value
+            : throw new InvalidOperationException($"Missing configuration value '{key}'.");
 }
