@@ -6,7 +6,7 @@ using BookLending.Application.Loans;
 using Microsoft.AspNetCore.Authorization;
 namespace BookLending.Api.Controllers;
 
-public record LendBookRequest(string MemberId, string Isbn, DateTime LoanDate, DateTime ReturnedOn);
+public record LendBookRequest(string MemberId, string Isbn, DateTime LoanDate, DateTime? ReturnedOn);
 
 public record LoanResponse(
     string Id,
@@ -66,6 +66,8 @@ public class LoansController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<LoanResponse>> LendBook(LendBookRequest request)
     {
+        if (request.ReturnedOn is not null && request.ReturnedOn < request.LoanDate)
+            return BadRequest("ReturnedOn cannot be before LoanDate.");
 
         var member = _members.GetMemberById(request.MemberId);
         if (member is null) return NotFound($"Member '{request.MemberId}' not found.");

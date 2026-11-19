@@ -67,7 +67,8 @@ public class LoanService
     {
         if (member == null) throw new ArgumentNullException(nameof(member));
         if (book == null) throw new ArgumentNullException(nameof(book));
-        if (LoanDate == null) throw new ArgumentNullException(nameof(LoanDate));
+        if (ReturnedOn is not null && ReturnedOn < LoanDate)
+            throw new ArgumentException("Returned date cannot be before the loan date.", nameof(ReturnedOn));
 
         var loanDate = LoanDate;
 
