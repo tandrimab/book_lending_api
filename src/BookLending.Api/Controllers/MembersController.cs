@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 namespace BookLending.Api.Controllers;
 
 public record CreateMemberRequest(string Name, Address Address,
-    [property: Required, EmailAddress,MaxLength(100)] string Email);
+    [Required, EmailAddress,MaxLength(100)] string Email);
 
 [ApiController]
 [Route("members")]
