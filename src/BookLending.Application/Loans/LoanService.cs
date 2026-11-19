@@ -25,12 +25,18 @@ public class LoanService
     private readonly ILoanRepository _loanRepository;
     private readonly IDistributedCache _cache;
     private readonly IEventPublisher _eventPublisher;
+    private readonly ServiceBusSettings _serviceBusSettings;
 
-    public LoanService(ILoanRepository loanRepository, IDistributedCache cache, IEventPublisher eventPublisher)
+    public LoanService(
+        ILoanRepository loanRepository,
+        IDistributedCache cache,
+        IEventPublisher eventPublisher,
+        ServiceBusSettings serviceBusSettings)
     {
         _loanRepository = loanRepository;
         _cache = cache;
         _eventPublisher = eventPublisher;
+        _serviceBusSettings = serviceBusSettings;
     }
 
     public IEnumerable<Loan> GetAllLoans() => _loanRepository.GetAllLoans();
@@ -68,6 +74,11 @@ public class LoanService
         var loan = new Loan(member.Id, book.Id, loanDate, ReturnedOn, book.LoanPeriod());
         _loanRepository.AddLoan(loan);
         await InvalidateStatsAsync();
+
+        await _eventPublisher.PublishAsync(
+            _serviceBusSettings.LoanEventsQueue,
+            new LoanCreated(loan.Id, loan.MemberId, loan.BookId, loan.DueDate));
+
         return loan;
     }
 

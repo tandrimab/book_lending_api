@@ -138,7 +138,69 @@ namespace BookLending.Infrastructure.Persistence.Migrations
                     b.ToTable("Members");
                 });
 
+            modelBuilder.Entity("BookLending.Domain.Reservations.Reservation", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
+
+                    b.Property<string>("BookId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("HoldExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("MemberId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
+
+                    b.Property<DateTime?>("NotifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("TriggeredByLoanId")
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId");
+
+                    b.HasIndex("TriggeredByLoanId")
+                        .IsUnique()
+                        .HasFilter("[TriggeredByLoanId] IS NOT NULL");
+
+                    b.HasIndex("BookId", "Status", "CreatedAt");
+
+                    b.ToTable("Reservations", (string)null);
+                });
+
             modelBuilder.Entity("BookLending.Domain.Loans.Loan", b =>
+                {
+                    b.HasOne("BookLending.Domain.Items.Book", null)
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BookLending.Domain.Members.Member", null)
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("BookLending.Domain.Reservations.Reservation", b =>
                 {
                     b.HasOne("BookLending.Domain.Items.Book", null)
                         .WithMany()

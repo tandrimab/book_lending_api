@@ -34,6 +34,10 @@ public static class DependencyInjection
         return services;
     }
 
+    /// <summary>
+    /// this: marks the method as an extension method of the parameter's type
+    /// IServiceCollection: the type being extended. It’s ASP.NET Core’s built-in DI container: the list of registered in Program.cs.
+    /// </summary>
     private static IServiceCollection AddMessaging(this IServiceCollection services, IConfiguration configuration)
     {
         var serviceBusConnection = configuration["ServiceBusConnection"]
